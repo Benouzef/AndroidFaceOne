@@ -20,6 +20,7 @@ import com.zappsit.faceone.dtos.DtoLoginSalesForce;
 import com.zappsit.faceone.dtos.DtoSendImageToSalesForce;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -162,10 +163,23 @@ public class Main2Activity extends AppCompatActivity {
                                    Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
                     ResponseBody responseBody = response.body();
+
+                    String contactId = "";
+                    try {
+                        contactId = responseBody.string();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    out.println(contactId);
+                    contactId = contactId.replace("\"", "");
+                    out.println(contactId);
+                    //Gson gson = new GsonBuilder().create();
+                    //String contactId = gson.fromJson(responseBody.charStream(), String.class);
+
                     textView.setText("Step 2/5: Sending image to Salesforce - OK");
                     progressBar.setProgress(25);
 
-                    callDetectMegviiAPI(image);
+                    callDetectMegviiAPI(image, contactId);
                 }
                 else {
                     textView.setText("Failure on Sending image to Salesforce : please resume");
@@ -186,7 +200,7 @@ public class Main2Activity extends AppCompatActivity {
 
     }
 
-    private void callDetectMegviiAPI(Bitmap image) {
+    private void callDetectMegviiAPI(Bitmap image, final String contactId) {
         final TextView textView = (TextView) findViewById(R.id.textView3);
         final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar2);
 
@@ -222,7 +236,7 @@ public class Main2Activity extends AppCompatActivity {
                         textView.setText("Step 3/5: Send image and call Detect - OK");
                         progressBar.setProgress(33);
 
-                        setUserId(face_token);
+                        setUserId(face_token, contactId);
 
                     }
                     else {
@@ -247,7 +261,7 @@ public class Main2Activity extends AppCompatActivity {
         });
     }
 
-    private void setUserId(final String face_token) {
+    private void setUserId(final String face_token, String contactId) {
         final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar2);
         final TextView textView = (TextView) findViewById(R.id.textView3);
 
@@ -256,7 +270,9 @@ public class Main2Activity extends AppCompatActivity {
 
         // Get text entered
         EditText username = (EditText) findViewById(R.id.editText2);
-        String userId = username.getText().toString();
+        //String userId = username.getText().toString();
+        String userId = contactId;
+
 
         MegviiClient client = ServiceGenerator.createService(MegviiClient.class);
 
