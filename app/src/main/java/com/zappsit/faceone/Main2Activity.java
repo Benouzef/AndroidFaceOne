@@ -120,6 +120,8 @@ public class Main2Activity extends AppCompatActivity {
                 else {
                     textView.setText("Failure on Salesforce login: please resume");
                     progressBar.setProgress(0);
+
+                    out.println(response.errorBody().toString());
                 }
             }
 
