@@ -2,6 +2,9 @@ package com.zappsit.faceone;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,14 +16,31 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.AccessToken;
+import com.facebook.AccessTokenTracker;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.Profile;
+import com.facebook.ProfileTracker;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
+import com.facebook.login.widget.ProfilePictureView;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.zappsit.faceone.dtos.DtoDetect;
 import com.zappsit.faceone.dtos.DtoLoginSalesForce;
 import com.zappsit.faceone.dtos.DtoSendImageToSalesForce;
 
+import org.json.JSONObject;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URL;
+import java.util.Arrays;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -32,38 +52,160 @@ import retrofit2.Response;
 
 import static java.lang.System.out;
 
-public class Main2Activity extends AppCompatActivity {
+public class Main3Activity extends AppCompatActivity {
 
-    private int progressStatus = 0;
+    private CallbackManager callbackManager;
+    private ProfileTracker profileTracker;
+    private AccessTokenTracker mAccessTokenTracker;
+    private Bitmap bitmapToPlayWith;
     private String faceset_token = "fc8bc42265d7d8571fc90cd9e016f2c1";
+
+    private void loginToMyFbApp() {
+        if (AccessToken.getCurrentAccessToken() != null) {
+            mAccessTokenTracker = new AccessTokenTracker() {
+                @Override
+                protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken currentAccessToken) {
+                    mAccessTokenTracker.stopTracking();
+                    if(currentAccessToken == null) {
+                        //(the user has revoked your permissions -
+                        //by going to his settings and deleted your app)
+                        //do the simple login to FaceBook
+                        //case 1
+                        DoSimpleLoginToFaceBook();
+                    }
+                    else {
+                        //you've got the new access token now.
+                        //AccessToken.getToken() could be same for both
+                        //parameters but you should only use "currentAccessToken"
+                        //case 2
+                        fetchProfile();
+                    }
+                }
+            };
+            mAccessTokenTracker.startTracking();
+            AccessToken.refreshCurrentAccessTokenAsync();
+        }
+        else {
+            //do the simple login to FaceBook
+            DoSimpleLoginToFaceBook();
+        }
+    }
+
+    private void DoSimpleLoginToFaceBook() {
+        LoginButton loginButton = (LoginButton) findViewById(R.id.buttonFaceBook);
+        loginButton.setReadPermissions(Arrays.asList("public_profile"));
+
+        callbackManager = CallbackManager.Factory.create();
+        loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                // App code
+                out.println(loginResult.getAccessToken().toString());
+                if(Profile.getCurrentProfile() == null) {
+                    profileTracker = new ProfileTracker() {
+                        @Override
+                        protected void onCurrentProfileChanged(Profile profile, Profile profile2) {
+                            // profile2 is the new profile
+                            //Log.v("facebook - profile", profile2.getFirstName());
+                            profileTracker.stopTracking();
+                        }
+                    };
+                    // no need to call startTracking() on mProfileTracker
+                    // because it is called by its constructor, internally.
+                }
+                else {
+                    Profile profile = Profile.getCurrentProfile();
+                    //Log.v("facebook - profile", profile.getFirstName());
+                }
+            }
+
+            @Override
+            public void onCancel() {
+                // App code
+                out.println("Cancel");
+            }
+
+            @Override
+            public void onError(FacebookException exception) {
+                // App code
+                out.println(exception.getMessage());
+            }
+        });
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main2);
+        setContentView(R.layout.activity_main3);
+
+        loginToMyFbApp();
     }
+
 
     public void processMegviiCalls(View view) {
+        ImageView imageViewDebug = (ImageView) findViewById(R.id.imageViewDebug);
 
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, 2);
-        }
+        callSalesForceToUpdateContact(((BitmapDrawable)imageViewDebug.getDrawable()).getBitmap());
     }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 2 && resultCode == RESULT_OK) {
-            Bundle extras = data.getExtras();
-            Bitmap imageBitmap = (Bitmap) extras.get("data");
 
-            ImageView image = (ImageView) findViewById(R.id.imageView2);
-            image.setImageBitmap(imageBitmap);
+            callbackManager.onActivityResult(requestCode, resultCode, data);
 
-            callSalesForceToUpdateContact(imageBitmap);
-            //callDetectMegviiAPI(imageBitmap);
-        }
+
     }
+
+    //Debug Hash Android: wI7QfPQ73l54buZ30VWAe0SYZTU=
+    //Generated with: keytool -exportcert -alias androiddebugkey -keystore \Users\bfillon\.android\debug.keystore | C:\Users\bfillon\Downloads\openssl-1.0.2j-x64_86-win64\openssl.exe sha1 -binary | C:\Users\bfillon\Downloads\openssl-1.0.2j-x64_86-win64\openssl.exe base64
+
+
+    private void fetchProfile() {
+        GraphRequest request = GraphRequest.newMeRequest(
+                AccessToken.getCurrentAccessToken(),
+                new GraphRequest.GraphJSONObjectCallback() {
+                    @Override
+                    public void onCompleted(JSONObject object, GraphResponse response) {
+                        // this is where you should have the profile
+                        out.println("fetched info " + object.toString());
+                        try {
+                            //imageViewFB
+                            ProfilePictureView profilePictureView;
+
+
+                            profilePictureView = (ProfilePictureView) findViewById(R.id.imageprofile);
+                            profilePictureView.setPresetSize(ProfilePictureView.LARGE);
+                            //profilePictureView.setDrawingCacheEnabled(true);
+                            profilePictureView.setProfileId(object.getString("id"));
+
+                            //ImageView fbImage = ( ( ImageView)profilePictureView.getChildAt( 0));
+                            //bitmap  = ( (BitmapDrawable) fbImage.getDrawable()).getBitmap();
+                            //Bitmap bitmap = profilePictureView.getDrawingCache();
+
+                            String profilePicUrl = object.getJSONObject("picture").getJSONObject("data").getString("url");
+                            ImageView imageViewDebug = (ImageView) findViewById(R.id.imageViewDebug);
+                            new DownloadImageTask(imageViewDebug, bitmapToPlayWith).execute(profilePicUrl);
+
+                            //ImageView v = (ImageView) findViewById(R.id.imageViewFB);
+                            //v.setImageBitmap(getFacebookProfilePicture(object.getString("id")));
+
+
+                        } catch (org.json.JSONException e){
+                            out.println(e.getMessage());
+                        }
+                    }
+                });
+        Bundle parameters = new Bundle();
+        parameters.putString("fields", "id,name,link,picture.type(large)"); //write the fields you need
+        request.setParameters(parameters);
+        request.executeAsync();
+    }
+
+
+
+
 
     private void callSalesForceToUpdateContact(final Bitmap image) {
         final TextView textView = (TextView) findViewById(R.id.textView3);

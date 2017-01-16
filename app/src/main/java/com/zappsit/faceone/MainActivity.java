@@ -53,6 +53,11 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    public void switchToFaceBook(View view) {
+        Intent intent = new Intent(this, Main3Activity.class);
+        startActivity(intent);
+    }
+
 
     public void getFaceSet(View view) {
         MegviiClient client = ServiceGenerator.createService(MegviiClient.class);
