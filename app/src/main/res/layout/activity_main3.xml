@@ -20,7 +20,7 @@
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/imageView2"
+        android:layout_below="@+id/imageViewDebug"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_marginTop="28dp"
@@ -39,13 +39,16 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="11dp" />
 
-    <com.facebook.login.widget.ProfilePictureView
-        android:id="@+id/imageprofile"
+
+    <Button
+        android:text="Send Picture!"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="19dp"
-        android:layout_below="@+id/textView3"
-        android:layout_centerHorizontal="true" />
+        android:id="@+id/button6"
+        android:onClick="processMegviiCalls"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="18dp" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -54,24 +57,14 @@
         android:text="Enter your name and..."
         android:ems="10"
         android:id="@+id/editText2"
-        android:layout_marginTop="12dp"
-        android:layout_below="@+id/imageprofile"
-        android:layout_centerHorizontal="true" />
-
-    <Button
-        android:text="Send Picture!"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/button6"
-        android:onClick="processMegviiCalls"
-        android:layout_below="@+id/editText2"
+        android:layout_above="@+id/button6"
         android:layout_centerHorizontal="true" />
 
     <ImageView
         android:id="@+id/imageViewDebug"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:layout_alignParentBottom="true"
+        android:layout_height="250dp"
+        android:layout_below="@+id/buttonFaceBook"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 </RelativeLayout>

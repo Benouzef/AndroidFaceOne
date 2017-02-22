@@ -117,6 +117,8 @@ public class Main3Activity extends AppCompatActivity {
                     Profile profile = Profile.getCurrentProfile();
                     //Log.v("facebook - profile", profile.getFirstName());
                 }
+
+                fetchProfile();
             }
 
             @Override
@@ -172,13 +174,13 @@ public class Main3Activity extends AppCompatActivity {
                         out.println("fetched info " + object.toString());
                         try {
                             //imageViewFB
-                            ProfilePictureView profilePictureView;
+                            //ProfilePictureView profilePictureView;
 
 
-                            profilePictureView = (ProfilePictureView) findViewById(R.id.imageprofile);
-                            profilePictureView.setPresetSize(ProfilePictureView.LARGE);
+                            //profilePictureView = (ProfilePictureView) findViewById(R.id.imageprofile);
+                            //profilePictureView.setPresetSize(ProfilePictureView.LARGE);
                             //profilePictureView.setDrawingCacheEnabled(true);
-                            profilePictureView.setProfileId(object.getString("id"));
+                            //profilePictureView.setProfileId(object.getString("id"));
 
                             //ImageView fbImage = ( ( ImageView)profilePictureView.getChildAt( 0));
                             //bitmap  = ( (BitmapDrawable) fbImage.getDrawable()).getBitmap();
