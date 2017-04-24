@@ -223,8 +223,8 @@ public class Main3Activity extends AppCompatActivity {
 
         //set to Force.com user account that has API access enabled
         String sfdcUserName = "benoit.fillon@free.fr";
-        String sfdcPassword = "elmagi8kFc!";
-        String sfdcToken = "nbLIh9gGodn6snYmCUMzEu7Vd"; //"f4SjYKXHrVG2bI5gQFxUo6h8O";
+        String sfdcPassword = "elmagi9kFc!";
+        String sfdcToken = "ERmVfCjMFbbG9tlUd8l6UMQme"; //"f4SjYKXHrVG2bI5gQFxUo6h8O";
 
         //create login password value
         String loginPassword = sfdcPassword + sfdcToken;
@@ -330,7 +330,8 @@ public class Main3Activity extends AppCompatActivity {
                 }
                 else {
                     textView.setText("Failure on Sending image to Salesforce : please resume");
-                    out.println(response.errorBody().toString());
+                    String errMessage = response.errorBody().toString();
+                    out.println(errMessage);
                     progressBar.setProgress(0);
                 }
             }
